@@ -96,8 +96,8 @@ function groupSpeakerConvo(speech) {
 
 function summarizeScript(speech) {
   var nlu = new NaturalLanguageUnderstandingV1({
-    username: "dde0a5ec-4e78-44bf-b0cc-7a1ed7b8aac6",
-    password: "WJrmhRPzYj0S",
+    username: "YOUR WATSON API USERNAME",
+    password: "YOUR WATSON API PASSWORD",
     version_date: "2018-03-19"
   });
 
