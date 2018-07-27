@@ -7,3 +7,4 @@ logs/
 *.log
 coverage/
 .idea/
+.package-lock.json
