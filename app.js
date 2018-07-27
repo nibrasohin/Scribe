@@ -51,9 +51,7 @@ app.get('/', (req, res) => {
 
 // Get token using your credentials
 app.get('/api/token', (req, res, next) => {
-  // callAPI();
   authService.getToken((err, token) => {
-    console.log('Getting token');
     if (err) {
       next(err);
     } else {
@@ -77,7 +75,6 @@ function callAPI(script) {
   const req = https.request(options, (res, b, c) => {
     res.setEncoding('utf8');
     res.on('data', (chunk) => {
-      console.log(chunk);
     });
   });
 
@@ -89,10 +86,7 @@ function callAPI(script) {
 function groupSpeakerConvo(speech) {
   var dict = {};
   var tempArray = speech.split('\n');
-
   tempArray.pop();
-  // console.log('TempArray: ', tempArray);
-
   for (var i = 0; i < tempArray.length; i++) {
     var split = tempArray[i].split(':');
     dict[split[0]] = dict[split[0]] ? (dict[split[0]] + split[1]) : split[1];
@@ -101,7 +95,6 @@ function groupSpeakerConvo(speech) {
 }
 
 function summarizeScript(speech) {
-  console.log('Inside Summarize: ');
   var nlu = new NaturalLanguageUnderstandingV1({
     username: "dde0a5ec-4e78-44bf-b0cc-7a1ed7b8aac6",
     password: "WJrmhRPzYj0S",
@@ -122,15 +115,11 @@ function summarizeScript(speech) {
         if (err) {
           console.log('error:', err);
         } else {
-          // console.log(JSON.stringify(response, null, 2));
-          // keywords = JSON.stringify(response, null, 2);
           res(response);
         }
       }
     );
   });
-
-  // return keywords;
 }
 
 var promiseRes = null;
@@ -164,35 +153,24 @@ app.post('/api/slack', (req, res, next) => {
       for (var j = 0; j < keywords['keywords'].length; j++) {
         currentSpeakerKeywords.push(keywords.keywords[j].text);
       }
-      console.log('Keywords: ', currentSpeakerKeywords);
-      speakerKeywords[keys[globalI-1]] = currentSpeakerKeywords;
-      console.log('Value of globalI inside: ', globalI);
-      if(globalI==(keys.length)) {
-        console.log('Resolving');
+      speakerKeywords[keys[globalI - 1]] = currentSpeakerKeywords;
+      if (globalI == (keys.length)) {
         promiseRes(speakerKeywords)
       }
     });
   }
 
-  var keywordFinalizer ='------------------\nKeywords/Important Points:\n';
-  promiseTester().then((speakerKeywords)=>{
-    console.log('speakerKeywords: ',speakerKeywords);
+  var keywordFinalizer = '------------------\nKeywords/Important Points:\n';
+  promiseTester().then((speakerKeywords) => {
     var speakerNames = Object.keys(speakerKeywords);
     speakerNames.sort();
-    for(var i=0;i<Object.keys(speakerKeywords).length;i++) {
-      keywordFinalizer = keywordFinalizer + speakerNames[i]+'  :  '+speakerKeywords[speakerNames[i]]+'\n';
+    for (var i = 0; i < Object.keys(speakerKeywords).length; i++) {
+      keywordFinalizer = keywordFinalizer + speakerNames[i] + '  :  ' + speakerKeywords[speakerNames[i]] + '\n';
     }
-    console.log('Keywordfinalizer: ', keywordFinalizer);
-    let script = '```' + headerMessage + data.test +keywordFinalizer+ '```';
+    let script = '```' + headerMessage + data.test + keywordFinalizer + '```';
     callAPI(script);
     globalI = 0;
-
   });
-
-
-
-
-
 });
 
 module.exports = app;

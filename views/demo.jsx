@@ -69,12 +69,9 @@ export default React.createClass({
 
   stopTranscription() {
     if (this.stream) {
-      let x =  document.getElementsByClassName("speaker-labels");
+      let x = document.getElementsByClassName("speaker-labels");
       let script = x[0].innerText;
-      // this.sendMessage(script);
       this.stream.stop();
-      // this.stream.removeAllListeners();
-      // this.stream.recognizeStream.removeAllListeners();
     }
     this.setState({ audioSource: null });
   },
@@ -110,7 +107,7 @@ export default React.createClass({
 
   handleChangeSpeakerName(speaker_id, name) {
     this.state.speakerNametags[speaker_id] = name;
-    this.setState({speakerNametags : this.state.speakerNametags});
+    this.setState({ speakerNametags: this.state.speakerNametags });
   },
 
   isNarrowBand(model) {
@@ -210,7 +207,6 @@ export default React.createClass({
   },
 
   handleStream(stream) {
-    console.log(stream);
     // cleanup old stream if appropriate
     if (this.stream) {
       this.stream.stop();
@@ -239,15 +235,10 @@ export default React.createClass({
         sent: true, binary: true, data: true, // discard the binary data to avoid waisting memory
       }))
       .on('close', (code, message) => this.handleRawMessage({ close: true, code, message }));
-
-    // ['open','close','finish','end','error', 'pipe'].forEach(e => {
-    //     stream.recognizeStream.on(e, console.log.bind(console, 'rs event: ', e));
-    //     stream.on(e, console.log.bind(console, 'stream event: ', e));
-    // });
   },
 
   handleRawMessage(msg) {
-    console.log('Message: ',msg);
+    console.log('Message: ', msg);
     this.setState({ rawMessages: this.state.rawMessages.concat(msg) });
   },
 
@@ -263,7 +254,6 @@ export default React.createClass({
 
   componentDidMount() {
     this.fetchToken();
-    // this.sendMessage();
     console.log('Hello');
     // tokens expire after 60 minutes, so automatcally fetch a new one ever 50 minutes
     // Not sure if this will work properly if a computer goes to sleep for > 50 minutes
@@ -279,7 +269,7 @@ export default React.createClass({
 
   sendMessage() {
 
-    let x =  document.getElementsByClassName("speaker-labels");
+    let x = document.getElementsByClassName("speaker-labels");
     let script = x[0].innerText;
 
     let data = {
@@ -293,12 +283,7 @@ export default React.createClass({
       headers: {
         "Content-Type": "application/json"
       }
-      // credentials: "same-origin"
     });
-    // return fetch('/api/slack', options).then((res) => {
-    //   console.log();
-    // }) // todo: throw here if non-200 status
-
     alert("Meeting Transcript Sent to Slack");
 
   },
@@ -323,9 +308,11 @@ export default React.createClass({
 
   handleModelChange(model) {
     this.reset();
-    this.setState({ model,
+    this.setState({
+      model,
       keywords: this.getKeywords(model),
-      speakerLabels: this.supportsSpeakerLabels(model) });
+      speakerLabels: this.supportsSpeakerLabels(model)
+    });
 
     // clear the microphone narrowband error if it's visible and a broadband model was just selected
     if (this.state.error === ERR_MIC_NARROWBAND && !this.isNarrowBand(model)) {
@@ -377,10 +364,7 @@ export default React.createClass({
     return r;
   },
 
-
-
-////
-  getSpeakerMetrics(instantnoodlesaretasty){
+  getSpeakerMetrics(instantnoodlesaretasty) {
     var speakers = {};
     var latestTime = 0;
 
@@ -389,22 +373,21 @@ export default React.createClass({
       if (instantnoodlesaretasty[0].results) {
         let prev_result_end_time = -2000;
         for (let i of instantnoodlesaretasty[0].results) {
-          if (!speakers[i.speaker] && i.speaker != undefined){
+          if (!speakers[i.speaker] && i.speaker != undefined) {
 
-            speakers[i.speaker] = {aggressive: 0, hesitance: 0, timespent: 0, lastSpoken: 0, timeSinceSpoken: 0,};
+            speakers[i.speaker] = { aggressive: 0, hesitance: 0, timespent: 0, lastSpoken: 0, timeSinceSpoken: 0, };
           }
           let start_time = i.alternatives[0].timestamps[0][1];
-          // if (start_time < (prev_result_end_time + 1))
           if (speakers[i.speaker] && i.speaker != undefined) {
-            if(start_time < prev_result_end_time + 0.5) {
+            if (start_time < prev_result_end_time + 0.5) {
               speakers[i.speaker].aggressive += 1;
             }
           }
 
-          prev_result_end_time = i.alternatives[0].timestamps[i.alternatives[0].timestamps.length - 1 ][2];
-          if(prev_result_end_time > latestTime)
+          prev_result_end_time = i.alternatives[0].timestamps[i.alternatives[0].timestamps.length - 1][2];
+          if (prev_result_end_time > latestTime)
             latestTime = prev_result_end_time;
-          if(speakers[i.speaker] && i.speaker != undefined) {
+          if (speakers[i.speaker] && i.speaker != undefined) {
             speakers[i.speaker].lastSpoken = prev_result_end_time;
             speakers[i.speaker].timespent += (prev_result_end_time - start_time);
           }
@@ -414,14 +397,11 @@ export default React.createClass({
 
 
 
-    for (let ie of Object.keys(speakers)){
-        console.log(ie);
-        speakers[ie].timeSinceSpoken = latestTime - speakers[ie].lastSpoken;
+    for (let ie of Object.keys(speakers)) {
+      console.log(ie);
+      speakers[ie].timeSinceSpoken = latestTime - speakers[ie].lastSpoken;
 
     }
-
-    console.log(speakers);
-
     return speakers;
   },
 
@@ -432,20 +412,10 @@ export default React.createClass({
     if (interim) {
       final.push(interim);
     }
-
-    //console.log(JSON.stringify(final, null, 2));
-
-
-
-
-    //console.log(JSON.stringify(final.results.alternatives, null, 2));
-
-
     return final;
   },
 
   handleError(err, extra) {
-    console.error(err, extra);
     if (err.name === 'UNRECOGNIZED_FORMAT') {
       err = 'Unable to determine content type from file name or header; mp3, wav, flac, ogg, opus, and webm are supported. Please choose a different file.';
     } else if (err.name === 'NotSupportedError' && this.state.audioSource === 'mic') {
@@ -460,9 +430,6 @@ export default React.createClass({
   },
 
   render() {
-    console.log("nametags");
-    console.log(this.state.speakerNametags);
-
     const buttonsEnabled = !!this.state.token;
     const buttonClass = buttonsEnabled
       ? 'base--button'
@@ -512,19 +479,11 @@ export default React.createClass({
 
           <p>This application is constructed using a Node back end, a React front end web app, and a Text to Speech Watson API, which handles the audio to text conversion. The speech is analyzed in real time to differentiate the different people that are speaking in the audio and display the multiple speakers in a script format. The key topics are found from a Natural Language Understanding Watson API that finds key words from a sample text that is obtained from the speech to text modification.</p>
         </div>
-        <hr/>
+        <hr />
         <div className="flex setup">
           <div className="column">
-            {/* <p>
-              <ModelDropdown
-                model={this.state.model}
-                token={this.state.token}
-                onChange={this.handleModelChange}
-              />
-            </p> */}
-
-          {/* hidden option */}
-            <p className={this.supportsSpeakerLabels() ? 'base--p' : 'base--p_light'} style={{display:"none",}}>
+            {/* hidden option */}
+            <p className={this.supportsSpeakerLabels() ? 'base--p' : 'base--p_light'} style={{ display: "none", }}>
               <input
                 className="base--checkbox"
                 type="checkbox"
@@ -541,7 +500,7 @@ export default React.createClass({
           </div>
 
           {/* hidden option */}
-          <div className="column" style={{ display:"none", }}>
+          <div className="column" style={{ display: "none", }}>
 
             <p>Keywords to spot: <input
               value={this.state.keywords}
@@ -563,52 +522,23 @@ export default React.createClass({
           </button>
 
           <button className="base--button" onClick={this.sendMessage} > Send Notes to Slack</button>
-
-          {/*<button className={buttonClass} onClick={this.handleUploadClick}>
-            <Icon type={this.state.audioSource === 'upload' ? 'stop' : 'upload'} /> Upload Audio File
-          </button>
-
-          <button className={buttonClass} onClick={this.handleSample1Click}>
-            <Icon type={this.state.audioSource === 'sample-1' ? 'stop' : 'play'} /> Play Sample 1
-          </button>
-
-          <button className={buttonClass} onClick={this.handleSample2Click}>
-            <Icon type={this.state.audioSource === 'sample-2' ? 'stop' : 'play'} /> Play Sample 2
-      </button>*/}
-
         </div>
 
         {err}
 
-        <div style={{display: 'flex', flexDirection: 'row'}}>
-        <Tabs selected={0}>
-          <Pane label="Transcript">
-            {this.state.settingsAtStreamStart.speakerLabels
-              ? <div><SpeakersView messages={messages} /></div>
-              : <Transcript messages={messages} />}
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <Tabs selected={0}>
+            <Pane label="Transcript">
+              {this.state.settingsAtStreamStart.speakerLabels
+                ? <div><SpeakersView messages={messages} /></div>
+                : <Transcript messages={messages} />}
 
-              <div label="autoscroll-marker" style={{ float:"left", clear: "both" }}
-                 ref={(el) => { this.transcriptEnd = el; this.transcriptEnd != null ? this.transcriptEnd.scrollIntoView({ behavior: "smooth" }) : ''; }}>
+              <div label="autoscroll-marker" style={{ float: "left", clear: "both" }}
+                ref={(el) => { this.transcriptEnd = el; this.transcriptEnd != null ? this.transcriptEnd.scrollIntoView({ behavior: "smooth" }) : ''; }}>
               </div>
-          </Pane>
-          {/*
-          <Pane label="Word Timings and Alternatives">
-            <TimingView messages={messages} />
-          </Pane>
-          <Pane label={`Keywords ${getKeywordsSummary(this.state.settingsAtStreamStart.keywords, messages)}`}>
-            <Keywords
-              messages={messages}
-              keywords={this.state.settingsAtStreamStart.keywords}
-              isInProgress={!!this.state.audioSource}
-            />
-          </Pane>
-          <Pane label="JSON">
-            <JSONView raw={this.state.rawMessages} formatted={this.state.formattedMessages} />
-          </Pane>*/}
-        </Tabs>
-
-        {/*<MetricView speaker_metrics={speaker_metrics} onSpeakerNameChange={this.handleChangeSpeakerName}/>*/}
-  </div>
+            </Pane>
+          </Tabs>
+        </div>
       </Dropzone>
     );
   },
